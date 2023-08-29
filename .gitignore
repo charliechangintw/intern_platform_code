@@ -1,0 +1,9 @@
+# 忽略特定檔案
+structured.csv
+
+# 忽略特定目錄
+__pycache__/
+uploads/
+
+# 忽略所有副檔名為 .tmp 的檔案
+*.tmp

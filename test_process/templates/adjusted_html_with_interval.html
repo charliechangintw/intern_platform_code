@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Progress Bar Experiment</title>
+    <style>
+        #progress-bar {
+            width: 0%;
+            height: 30px;
+            background-color: green;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div id="progress-bar">0%</div>
+<button onclick="startProcess()">Start Process</button>
+
+<script>
+    function startProcess() {
+        fetch('/start-process', {method: 'POST'}).then(() => {
+            fetchProgress();
+        });
+    }
+
+    function fetchProgress() {
+        fetch('/get-progress').then(response => response.json()).then(data => {
+            const progressBar = document.getElementById('progress-bar');
+            progressBar.style.width = data.progress + '%';
+            console.log("Fetched progress:", data.progress, "at", new Date().toLocaleTimeString());
+            progressBar.textContent = data.progress + '%';
+            if (data.progress >= 100) { clearInterval(intervalId); }
+                let intervalId = setInterval(fetchProgress, 2000);
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

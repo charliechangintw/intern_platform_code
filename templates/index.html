@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text Preprocessing</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet"/>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <style>
+        .hidden {
+          display: none;
+        }
+        #processed-data th {
+            text-align: center;
+        }
+        body {
+            background-color: rgb(235, 236, 237);
+            font-family:"Times New Roman","標楷體";
+        }
+        .custom-box {
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            margin-bottom: 0px;
+        }
+        .custom-button {
+            background-color: rgb(35, 140, 76);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 6px 15px;
+            cursor: pointer;
+            outline: none; 
+        }
+        .custom-button:hover {
+            background-color: rgb(53, 117, 98);
+        }
+        p {
+            margin-bottom: 0px;
+        }
+        button.disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        select {
+            background-color: white;
+            color: black;
+            font-family: "Times New Roman", "標楷體";
+            font-size: 18px;
+            border: 1px solid black;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        select:focus, select:hover {
+            background-color: white;
+        }
+        select option:hover {
+            background-color: rgb(35, 140, 76);
+        }
+    </style>
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-p34f1UUtsS3wqzfto5wAAmdvj+osOnFyQFpp4Ua3gs/ZVWx6oOypYoCJhGGScy+8" crossorigin="anonymous"></script>
+    <div class="container" style=" padding-right: 0px; padding-left: 0px; ">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="custom-box" style="margin-top: 20px;">
+                    <h5>Step 1 : 上傳 CSV 檔案</h5>
+                    <input id="csvFile" type="file" style="display: none;">
+                    <button  class="custom-button" id="customFileButton" onclick="document.getElementById('csvFile').click();">選擇檔案</button>
+                    <span id="selectedFileName">未選擇任何檔案</span>
+                    <script>
+                        $('#csvFile').on('change', function() {
+                            var fileName = $(this).val().split('\\').pop();
+                            $('#selectedFileName').html(fileName);
+                        });
+                    </script>
+                    <button class="custom-button" onclick="uploadCSV()" style=" margin-left: 20px; ">上傳</button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="custom-box">
+                    <h5>Step 2 : 選擇欄位進行處理</h5>
+                    <p id="uploadReminder">請先上傳檔案</p>
+                    <form id="columnSelectionForm">
+                    </form>
+                </div>
+            </div>
+        </div>            
+        <div class="row">
+            <div class="col-md-12">
+                <div class="custom-box">
+                    <div>
+                        <h5>Step 3 : 選擇文本處理選項</h5>
+                        <div>
+                            <input id="remove_punctuation" name="process" type="checkbox" value="remove_punctuation" class="text-processing-option"/>
+                            <label for="remove_punctuation">去除標點符號</label>
+                            <select name="order_remove_punctuation" class="hidden">
+                                <option value="1" selected>1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                            </select>
+                        </div>
+                        <div>
+                            <input id="convert_lowercase" name="process" type="checkbox" value="convert_lowercase" class="text-processing-option"/>
+                            <label for="convert_lowercase">轉換為小寫</label>
+                            <select name="order_convert_lowercase" class="hidden">
+                                <option value="1">1</option>
+                                <option value="2" selected>2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                            </select>
+                        </div>
+                        <div>
+                            <input id="remove_stopwords" name="process" type="checkbox" value="remove_stopwords" class="text-processing-option"/>
+                            <label for="remove_stopwords">去除停用詞</label>
+                            <select name="order_remove_stopwords" class="hidden">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3" selected>3</option>
+                                <option value="4">4</option>
+                            </select>
+                        </div>
+                        <div>
+                            <input id="remove_spaces" name="process" type="checkbox" value="remove_spaces" class="text-processing-option"/>
+                            <label for="remove_spaces">去除多餘的空格</label>
+                            <select name="order_remove_spaces" class="hidden">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4" selected>4</option>
+                            </select>
+                        </div>
+                        <input type="hidden" id="filename" name="filename" value="">
+                        <button class="custom-button" onclick="selectAllOptions()">全選</button>
+                        <button class="custom-button" onclick="applyTextProcessing()">執行</button>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <div class="row">
+            <div class="col-md-12">
+                <div class="custom-box">
+                    <h5>Step 4 : 預覽處理後的檔案</h5>
+                    <!-- <div id="processed-data">
+                        <p id="processingReminder">請先執行文本處理</p>
+                    </div> -->
+                    <button class="custom-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" 
+                        aria-controls="collapseExample" style="margin-bottom: 10px;">
+                        展開
+                    </button>
+                    <div class="collapse" id="collapseExample">
+                        <div id="processed-data">
+                            <p id="processingReminder">請先執行文本處理</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>           
+        <div class="row">
+            <div class="col-md-12">
+                <div class="custom-box">
+                    <h5>Step 5 : 下載處理後的檔案</h5>
+                    <button class="custom-button" onclick="downloadProcessedCSV()">下載</button>
+                </div>
+            </div>
+        </div> 
+        <div class="row">
+            <div class="col-md-12">
+                <div class="custom-box">
+                    <h5>Step 6 : 計算字頻</h5>
+                    <button class="custom-button" onclick="computeWordFrequency()">計算字頻</button>
+                    <p id="computeStatus">請開始計算</p>
+                    <button class="custom-button disabled" id="download-result-button" onclick="downloadResult()" disabled>下載結果</button>
+                </div>
+            </div>
+        </div> 
+        <div class="row">
+            <div class="col-md-12">
+                <div class="custom-box">
+                    <h5>Step 7 : 視覺化</h5>
+                    <button class="custom-button" id="generate-wordcloud-btn" onclick="generateAndDisplayWordclouds()">產生文字雲</button>
+                    <select id="wordcloudSelector" style="display: none;" onchange="displaySelectedWordcloud()">
+                    </select>
+                    <div id="wordcloudContainer">
+                        <img id="wordcloudImage" src="" alt="Wordcloud" width="800" height="400" style="display: none;">
+                    </div>
+                    <button class="custom-button" id="download-wordcloud-btn" style="display: none;">下載文字雲</button>
+                </div>
+                <script>
+                    function generateAndDisplayWordclouds() {
+                        $.getJSON("/generate_wordcloud", function(data) {
+                            
+                            console.log(data);
+
+                            let wordcloud_paths = data.wordcloud_paths;
+                            $("#wordcloudSelector").empty();
+                            $("#wordcloudContainer").empty();
+                            for(let path of wordcloud_paths) {
+                                let columnName = path.split("_")[1].split(".")[0];
+                                $("#wordcloudSelector").append(`<option value="${path}">${columnName}</option>`);
+                                $("#wordcloudContainer").append(`<img id="${columnName}" src="${path}" alt="Wordcloud" width="800" height="400" style="display: none;">`);
+                            }
+                            $("#wordcloudContainer img:first-child").show();
+                            $("#wordcloudSelector").show();
+                            $("#download-wordcloud-btn").show();
+                            $("#wordcloudSelector").on("change", function() {
+                                let selectedWordcloud = $(this).val();
+                                $("#download-wordcloud-btn").attr("href", "/download_wordcloud?name=" + selectedWordcloud);
+                            });
+                        });
+                    }
+                    function displaySelectedWordcloud() {
+                        $("#wordcloudContainer img").hide();
+                        let selectedWordcloud = $("#wordcloudSelector").val();
+                        let columnName = selectedWordcloud.split("_")[1].split(".")[0];
+                        $(`#${columnName}`).show();
+                    }
+                </script>                
+            </div>
+        </div> 
+    </div>              
+    <script>
+        function uploadCSV() {
+            let csvFile = document.getElementById('csvFile');
+            if (!csvFile.files.length) {
+                alert('請先選擇檔案！');
+                return;
+            }
+            let formData = new FormData();
+            formData.append('file', $('#csvFile')[0].files[0]);
+            $.ajax({
+                url: '/upload',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    uploadedFilename = response.filename;
+                    if (response.error) {
+                        alert(response.error);
+                    } else {
+                        alert('上傳成功');
+                        getColumnNames(response.filename);
+                        document.getElementById('filename').value = response.filename;
+                    }
+                },
+                error: function() {
+                    alert('Error uploading the file.');
+                }
+            });
+        }
+
+        function getColumnNames(filename) {
+            $.ajax({
+                url: '/columns',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ filename: filename }),
+                dataType: 'json',
+                success: function(response) {
+                    if (response.error) {
+                        alert(response.error);
+                    } else {
+                        let columns = response.columns;
+                        let columnSelectionForm = $('#columnSelectionForm');
+                        columnSelectionForm.empty();
+                        for (let column of columns) {
+                            columnSelectionForm.append('<input type="checkbox" name="columns" value="' + column + '"/>' + column + '<br>');
+                        }
+                        $('#uploadReminder').hide();
+                    }
+                },
+                error: function() {
+                    alert('Error fetching column names.');
+                }
+            });
+        }
+
+        function selectAllOptions() {
+            $("input[type='checkbox'].text-processing-option").prop('checked', true);
+        }
+
+        function applyTextProcessing() {
+            if (typeof uploadedFilename === 'undefined' || !uploadedFilename) {
+                alert('請先上傳檔案！');
+                clearInterval(intervalId);
+                return;
+            }
+            let selectedColumns = [];
+            $('input[name="columns"]:checked').each(function() {
+                selectedColumns.push($(this).val());
+            });
+
+            if (selectedColumns.length === 0) {
+                alert('請先選擇欄位！');
+                return;
+            }
+            let formData = new FormData(document.getElementById('columnSelectionForm'));
+            formData.append('filename', uploadedFilename);
+            let selectedOperations = [];
+            $('input[name="process"]:checked').each(function() {
+                selectedOperations.push($(this).val());
+            });
+            if (selectedOperations.length === 0) {
+                alert('請先選擇文本處理選項！');
+                return;
+            }
+            for (let operation of selectedOperations) {
+                formData.append('operations', operation);
+                formData.append('order_' + operation, $('select[name="order_' + operation + '"]').val());
+            }
+            $('#progress-container').removeClass('hidden');
+            let intervalId = setInterval(fetchProgress, 1000);
+            $.ajax({
+                url: '/process-data',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    $('#processed-data').html(response);
+                    $('#processingReminder').hide();
+                    clearInterval(intervalId);
+                },
+                error: function() {
+                    alert('Error processing the data.');
+                    clearInterval(intervalId);
+                }
+            });
+        }
+    
+        function downloadProcessedCSV() {
+            window.location.href = '/download-processed-csv';
+        }
+
+        function fetchProgress() {
+            $.ajax({
+                url: '/get-progress',
+                type: 'GET',
+                success: function(response) {
+                    let progress = response.progress;
+                    $('#progress-bar').css('width', progress + '%').attr('aria-valuenow', progress).text(progress + '%');
+                },
+                error: function() {
+                    console.log('Error fetching progress.');
+                }
+            });
+        }
+
+        function computeWordFrequency() {
+            $('#computeStatus').text('正在計算');
+            let selectedColumns = [];
+            $("input[name='columns']:checked").each(function() {
+                selectedColumns.push($(this).val());
+            });
+            $.post('/compute-word-frequency', { columns: selectedColumns }, function(data){
+                if (data.success) {
+                    $('#computeStatus').text('完成計算');
+                    document.getElementById('download-result-button').removeAttribute('disabled');
+                    $('#download-result-button').removeClass('disabled');
+                } else {
+                    $('#computeStatus').text('計算出錯: ' + data.error);
+                }
+            }).fail(function() {
+                $('#computeStatus').text('計算出錯');
+            });
+        }
+        
+        function downloadResult() {
+            window.location.href = '/download-word-frequency-result';
+        }
+
+        document.getElementById("generate-wordcloud-btn").addEventListener("click", function() {
+            fetch('/generate_wordcloud')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    document.getElementById("wordcloud-image").src = data.wordcloud_path;
+                    document.getElementById("wordcloud-image").style.display = "block";
+                    document.getElementById("download-wordcloud-btn").style.display = "block";
+                } else {
+                    alert("Error generating wordcloud: " + data.message);
+                }
+            });
+        });
+
+        document.getElementById("download-wordcloud-btn").addEventListener("click", function() {
+            let selectedWordcloud = $("#wordcloudSelector").val();
+            window.open('/download_wordcloud?path=' + selectedWordcloud, '_blank');
+        });
+
+    </script>
+    
+</body>
+</html>

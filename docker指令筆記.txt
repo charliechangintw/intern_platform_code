@@ -1,0 +1,89 @@
+docker build -t text_processing_app .
+docker build -t text_proc .
+建立 image 指令，要切到包含Dockerfile的目錄下(最後面的點一定要有，代表當前目錄)
+
+docker build -t username/myimage:tag .
+如果更改 app.py 或其他任何文件，Docker image 不會自動更新，要重新建立 image 
+
+docker images
+列出本地所有 Docker images
+
+docker run -p 5000:5000 text_processing_app
+docker run -p 8080:8080 text_proc
+啟動一個新的容器，-p <主機端口>:<容器端口>，(Flask常用 5000 port)
+-p 5000:5000 Docker 將容器的 5000 port映射到主機的 5000 port，
+可以在瀏覽器中訪問 http://localhost:5000
+
+docker run --name my_container_name -p 5000:5000 text_processing_app
+--name 參數，啟動容器時指定一個名稱
+
+docker rename CONTAINER_ID_OR_NAME NEW_NAME
+重新命名容器名稱
+
+docker stop [CONTAINER_ID or CONTAINER_NAME]
+關閉正在運行的容器
+
+docker ps
+查看正在運行的容器
+
+docker ps -a
+查看所有容器，包括已停止的容器
+
+docker start [CONTAINER_ID or CONTAINER_NAME]
+重新啟動一個已停止的容器(而不是創建一個新的容器)
+
+docker tag local-image-name:tag username/myimage:tag
+docker tag text_processing_app:latest charliechangintw/text_processing_app:v1.0
+為 image 添加標籤，使其指向 Docker Hub
+每個 Docker image 都有一個名稱和標籤，標籤通常用於版本控制
+
+docker push username/myimage:tag
+docker push charliechangintw/text_processing_app:v1.0
+推送 image 到 Docker Hub
+
+docker push username/myimage:tag
+docker push charliechangintw/text_processing_app:v2.0
+推送更新後的 image
+每次文件更改時，都需要重新建立和推送 image ，因為 image 是靜態的，
+不會自動反映源文件的更改，重新建立和推送 image 可能會消耗大量的時間，
+建議只在確定所有更改都已完成並經過測試後才這麼做
+
+docker tag local-image-name gcr.io/YOUR_PROJECT_ID/my-image
+docker push gcr.io/YOUR_PROJECT_ID/my-image
+local-image-name 是本地 Docker image 名稱，
+YOUR_PROJECT_ID 是 Google Cloud 專案 ID，
+my-image 是希望在 GCR 中使用的 image 名稱
+
+docker tag text_processing_app gcr.io/csdfm-lab/text-processor
+docker push gcr.io/csdfm-lab/text-processor
+docker tag text_proc gcr.io/csdfm-lab/text_proc
+docker push gcr.io/csdfm-lab/text_proc
+將 Docker image 推送到 Google Container Registry(GCR)
+
+gcloud run deploy --image gcr.io/YOUR_PROJECT_ID/text-processor --platform managed
+gcloud run deploy --image gcr.io/csdfm-lab/text-processor --platform managed
+gcloud run deploy --image gcr.io/csdfm-lab/text_proc --platform managed
+使用 Cloud Run 部署 image
+
+在 Google Cloud Console 的側邊欄中，選擇 "Container Registry"，
+顯示上傳的所有 Docker image，GCR 提供一個地方儲存和分享 Docker image
+
+gcloud config list project --format "value(core.project)"
+找到 Google Cloud 專案 ID
+
+gcloud auth configure-docker
+用於配置 Docker CLI，以使用 gcloud 作為認證助手，
+這樣就可以將 Docker image 推送到 Google Container Registry (GCR) ，
+而不會遇到認證問題，嘗試將 Docker image 推送到 GCR 或從 GCR 拉取 image 時，
+Docker 需要知道您是誰，以及是否有權限這麼做
+
+
+
+
+
+
+
+
+
+
+
