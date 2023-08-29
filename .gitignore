@@ -5,5 +5,5 @@ structured.csv
 __pycache__/
 uploads/
 
-# 忽略所有副檔名為 .tmp 的檔案
-*.tmp
+# 忽略所有副檔名為 .txt 的檔案
+*.txt
